@@ -17,7 +17,7 @@ if __name__ == "__main__":
     file_path = "data/nombres_raw.txt"
     start_token = "-"
     end_token = "."
-    alphabet = "abcdefghijklmnopqrstuvwxyz "
+    alphabet = "abcçdefghijklm'nñopqrstuvwxyz "
 
     # Load and preprocess data
     bigrams = load_and_preprocess_data(file_path, start_token, end_token)
@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # Count bigrams and convert to probabilities
     bigram_counts = count_bigrams(bigrams, char_to_idx)
-    bigram_probabilities = bigrams_count_to_probabilities(bigram_counts)
+    bigram_probabilities = bigrams_count_to_probabilities(bigram_counts,1)
 
     num_names_to_generate = 10
     print("Generated Names:")

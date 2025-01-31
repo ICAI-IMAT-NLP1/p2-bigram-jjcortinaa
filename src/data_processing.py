@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 def load_and_preprocess_data(
-    filepath: str, start_token: str = "!", end_token: str = "."
+    filepath: str, start_token: str = "<S>", end_token: str = "<E>"
 ) -> List[Tuple[str, str]]:
     """
     Load text from a file and preprocess them into bigrams with specified start and end tokens.
@@ -29,8 +29,14 @@ def load_and_preprocess_data(
     with open(filepath, "r") as file:
         lines: List[str] = file.read().splitlines()
 
-    # TODO
-    bigrams: List[Tuple[str, str]] = None
+    bigrams: List[Tuple[str, str]] = []
+
+    for line in lines:
+        line = line.split(" ")[:-2]
+        line = " ".join(line).lower()
+        name = f"{start_token}{line}{end_token}"
+        for i in range(1,len(name)):
+            bigrams.append((name[i-1],name[i]))
 
     return bigrams
 
@@ -49,8 +55,11 @@ def char_to_index(alphabet: str, start_token: str, end_token: str) -> Dict[str, 
     """
     # Create a dictionary with start token at the beginning and end token at the end
     # TODO
-    char_to_idx: Dict[str, int] = None
-
+    char_to_idx: Dict[str, int] = {}
+    char_to_idx[start_token]=0
+    for i in range(0,len(alphabet)):
+        char_to_idx[alphabet[i]]=i+1
+    char_to_idx[end_token]=len(alphabet)+1
     return char_to_idx
 
 
@@ -66,8 +75,11 @@ def index_to_char(char_to_index: Dict[str, int]) -> Dict[int, str]:
     """
     # Reverse the char_to_index mapping
     # TODO
-    idx_to_char: Dict[int, str] = None
+    
+    idx_to_char: Dict[int, str] = {}
 
+    for char,indx in char_to_index.items():
+        idx_to_char[indx]=char
     return idx_to_char
 
 
@@ -92,11 +104,18 @@ def count_bigrams(
     """
 
     # Initialize a 2D tensor for counting bigrams
+    
     # TODO
-    bigram_counts: torch.Tensor = None
+    bigram_counts: torch.Tensor = torch.zeros(len(char_to_idx.keys()),len(char_to_idx.keys()),dtype=torch.float32)
+    for bigram in bigrams:
+        first = bigram[0]
+        last = bigram[1]
+        index_first = char_to_idx[first]
+        index_last = char_to_idx[last]
+        bigram_counts[index_first][index_last]+=1
 
     # Iterate over each bigram and update the count in the tensor
-    # TODO
+    
 
     return bigram_counts
 
@@ -129,7 +148,7 @@ if __name__ == "__main__":
     file_path: str = "data/nombres_raw.txt"
 
     # Define the alphabet (ensure it covers all characters in your data)
-    alphabet: str = "abcdefghijklmnopqrstuvwxyz "
+    alphabet: str = "abcçdefghijklmnñ'opqrstuvwxyz "
 
     start_token: str = "-"
     end_token: str = "."
